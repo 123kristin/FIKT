@@ -1,0 +1,14 @@
+### Tiny data for demo only
+bridge2006_csv:
+    data_root: /home3/zhiyu/third/data/
+    data_format: csv
+    train_data: /home3/zhiyu/third/data/bridge2006_csv/train.csv
+    valid_data: /home3/zhiyu/third/data/bridge2006_csv/valid.csv
+    test_data: /home3/zhiyu/third/data/bridge2006_csv/test.csv
+    min_categr_count: 1
+    feature_cols:
+        [{name: ['Anon Student Id', 'KC(SubSkills)', 'Questions', 'Hints'], active: True, dtype: str, type: categorical},
+       {name: ['First Transaction Time'], active: True, dtype: float, type: numeric}]
+    label_col: {name: correct, dtype: int}
+
+

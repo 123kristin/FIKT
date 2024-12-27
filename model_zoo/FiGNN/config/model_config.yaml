@@ -1,0 +1,37 @@
+Base:
+    model_root: './checkpoints/'
+    num_workers: 3
+    verbose: 1
+    early_stop_patience: 10
+    pickle_feature_encoder: True
+    save_best_only: True
+    eval_steps: null
+    debug_mode: False
+    group_id: null
+    use_features: null
+    feature_specs: null
+    feature_config: null
+
+FiGNN_test:
+    model: FiGNN
+    dataset_id: bridge2006_csv
+    loss: 'binary_crossentropy'
+    metrics: ['logloss', 'AUC', 'ACC']
+    task: binary_classification
+    optimizer: adam
+    learning_rate: 1.e-3
+    embedding_regularizer: 1.e-8
+    net_regularizer: 0
+    batch_size: 256
+    embedding_dim: 128
+    gnn_layers: 1
+    use_residual: True
+    use_gru: True
+    reuse_graph_layer: False
+    epochs: 200
+    shuffle: True
+    seed: 2024
+    monitor: 'AUC'
+    monitor_mode: 'max'
+    lda_topic_dim: 10
+

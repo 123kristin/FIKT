@@ -1,0 +1,8 @@
+### Tiny data for tests only
+
+bridge2006_csv:
+    data_root: ../data/ 
+    data_format: csv
+    train_data: ../data/bridge2006_csv/train.csv
+    valid_data: ../data/bridge2006_csv/valid.csv
+    test_data: ../data/bridge2006_csv/test.csv
