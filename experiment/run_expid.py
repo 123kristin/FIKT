@@ -27,7 +27,7 @@ from fuxictr.features import FeatureMap
 from fuxictr.pytorch.dataloaders import RankDataLoader
 from fuxictr.pytorch.torch_utils import seed_everything
 from fuxictr.preprocess import FeatureProcessor, build_dataset
-import model_zoo_1
+
 import gc
 import argparse
 import os

@@ -81,16 +81,7 @@ class FiGNN(BaseModel):
         y_pred = torch.sigmoid(y_pred)  # [batch_size, 1]
         return_dict = {"y_pred": y_pred}
 
-        # todo
-        # # 保存用于可视化
-        # h_out_numpy = h_out.detach().cpu().numpy()  # .detach() 断开计算图
-        # np.save('/home3/zhiyu/third/fig/h_out.npy', h_out_numpy)
-        que_diff_numpy = que_diff.detach().cpu().numpy()  # .detach() 断开计算图
-        np.save('/home3/zhiyu/third/fig/que_diff.npy', que_diff_numpy)
-        # stu_ability_numpy = stu_ability.detach().cpu().numpy()  # .detach() 断开计算图
-        # np.save('/home3/zhiyu/third/fig/stu_ability.npy', stu_ability_numpy)
-        # p_numpy = p.detach().cpu().numpy()  # .detach() 断开计算图
-        # np.save('/home3/zhiyu/third/fig/p.npy', p_numpy)
+      
 
         return return_dict
 
@@ -175,8 +166,5 @@ class AttentionalPrediction(nn.Module):
     def forward(self, h):
         score = self.mlp1(h).squeeze(-1) # b x f
         weight = self.mlp2(h.flatten(start_dim=1)) # b x f  # torch.Size([256, 4])
-        # # todo 保存权重，进行可视化
-        # weight_numpy = weight.cpu().detach().numpy()
-        # np.save('/home3/zhiyu/third/fig/weight_algebra.npy', weight_numpy)
         logit = (weight * score).sum(dim=1, keepdim=True)
         return logit
