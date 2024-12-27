@@ -23,22 +23,11 @@ from fuxictr.utils import load_dataset_config, set_logger, print_to_json
 import logging
 
 if __name__ == '__main__':
-    # Load params from config files
-    # config_dir = '/home3/zhiyu/third/demo/config/example1_config' 
-    # config_dir = '/home3/zhiyu/third/demo/config/feature_map_config' # czy 生成2009_csv下的feature_map.json等文件
-    # config_dir = '/home3/zhiyu/third/demo/config/feature_map_config_2012'
-    # config_dir = '/home3/zhiyu/third/demo/config/feature_map_config_2015'
-    # config_dir = '/home3/zhiyu/third/demo/config/feature_map_config_algebra_2005'
-    config_dir = '/home3/zhiyu/third/demo/config/feature_map_config_bridge_2006'
-    # config_dir = '/home3/zhiyu/third/demo/config/feature_map_config_nips34'
-    # config_dir = '/home3/zhiyu/third/demo/config/feature_map_config_junyi'
-    # dataset_id = 'tiny_example1'
-    # dataset_id = '2009_csv'
-    # dataset_id = '2012_csv'
-    # dataset_id = 'algebra2005_csv'
+   
+    config_dir = '../demo/config/feature_map_config_bridge_2006'
+  
     dataset_id = 'bridge2006_csv'
-    # dataset_id = 'junyi_csv'
-    # dataset_id = 'nips34_csv'
+   
     params = load_dataset_config(config_dir, dataset_id)
 
     # set up logger
