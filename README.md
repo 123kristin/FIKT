@@ -1,4 +1,5 @@
 # FIKT
+测试
 
 This repository contains the implementation of **FIKT: Feature-Interaction Knowledge Tracing with Adaptive Graphs and IRT-Inspired Prediction**.
 
