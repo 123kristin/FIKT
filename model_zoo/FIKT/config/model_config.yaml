@@ -24,7 +24,7 @@ FIKT_test:
     net_regularizer: 0
     batch_size: 256
     embedding_dim: 128
-    gnn_layers: 1
+    gnn_layers: 2
     use_residual: True
     use_gru: True
     reuse_graph_layer: False

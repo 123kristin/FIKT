@@ -80,7 +80,7 @@ The default configuration in [model_zoo/FIKT/config/model_config.yaml](./model_z
 - learning rate: `1e-3`
 - batch size: `256`
 - embedding dimension: `128`
-- graph layers: `1`
+- graph layers: `2`
 - residual connection: `True`
 - GRU update: `True`
 - parameter sharing across graph layers: `False`
