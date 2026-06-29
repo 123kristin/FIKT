@@ -39,7 +39,7 @@ class FeatureProcessor(object):
                  feature_cols=[],
                  label_col=[],
                  dataset_id=None, 
-                 data_root="/home3/zhiyu/FuxiCTR-main/data/",
+                 data_root="./data/",
                  **kwargs):
         logging.info("Set up feature processor...")
         self.data_dir = os.path.join(data_root, dataset_id)

@@ -27,6 +27,8 @@ from fuxictr.features import FeatureMap
 from fuxictr.pytorch.dataloaders import RankDataLoader
 from fuxictr.pytorch.torch_utils import seed_everything
 from fuxictr.preprocess import FeatureProcessor, build_dataset
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../model_zoo/FIKT"))
+import src
 
 import gc
 import argparse
@@ -39,7 +41,7 @@ if __name__ == '__main__':
     '''
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default='./config/', help='The config directory.')
-    parser.add_argument('--expid', type=str, default='DeepFM_test', help='The experiment id to run.')
+    parser.add_argument('--expid', type=str, default='FIKT_test', help='The experiment id to run.')
     parser.add_argument('--gpu', type=int, default=-1, help='The gpu index, -1 for cpu')
     args = vars(parser.parse_args())
     
@@ -60,7 +62,7 @@ if __name__ == '__main__':
     feature_map.load(feature_map_json, params)
     logging.info("Feature specs: " + print_to_json(feature_map.features))
     
-    model_class = getattr(model_zoo_1, params['model'])
+    model_class = getattr(src, params['model'])
     model = model_class(feature_map, **params)
     model.count_parameters() # print number of parameters used in model
 
@@ -84,4 +86,3 @@ if __name__ == '__main__':
             .format(datetime.now().strftime('%Y%m%d-%H%M%S'), 
                     ' '.join(sys.argv), experiment_id, params['dataset_id'],
                     "N.A.", print_to_list(valid_result), print_to_list(test_result)))
-

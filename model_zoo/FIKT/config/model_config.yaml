@@ -12,8 +12,8 @@ Base:
     feature_specs: null
     feature_config: null
 
-FiGNN_test:
-    model: FiGNN
+FIKT_test:
+    model: FIKT
     dataset_id: bridge2006_csv
     loss: 'binary_crossentropy'
     metrics: ['logloss', 'AUC', 'ACC']
@@ -34,4 +34,3 @@ FiGNN_test:
     monitor: 'AUC'
     monitor_mode: 'max'
     lda_topic_dim: 10
-

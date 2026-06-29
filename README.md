@@ -1,59 +1,33 @@
-# FigKT
+# FIKT
 
-This repository contains the code and paper materials for **FigKT**, a knowledge tracing framework that combines:
+This repository contains the implementation of **FIKT: Feature-Interaction Knowledge Tracing with Adaptive Graphs and IRT-Inspired Prediction**.
 
-- feature-level interaction modeling
-- dynamic graph evolution
-- an enhanced IRT-inspired prediction module
-
-The corresponding manuscript is available in [sn-article.tex](./sn-article.tex).
+FIKT is designed for feature-enriched knowledge tracing records, where each interaction may include categorical and numerical behavioral fields such as student identifiers, item identifiers, concept labels, hint usage, timestamps, and other context signals. Instead of treating these fields as loosely attached side features, FIKT represents them as feature nodes, learns adaptive interactions among them, and combines the resulting graph-derived state with an IRT-inspired prediction module.
 
 ## Overview
 
-Modern educational platforms record more than question-response pairs. They also contain heterogeneous behavioral attributes such as student identifiers, question identifiers, hint usage, timestamps, and other contextual signals. FigKT is designed to model these attributes explicitly rather than treating them as loosely attached side information.
+The model contains three main stages:
 
-At a high level, the model consists of three stages:
+1. Feature embedding for heterogeneous categorical and numerical fields.
+2. Adaptive feature-interaction graph learning with recurrent graph-state updates.
+3. IRT-inspired prediction with difficulty-related and ability-related neural factors plus a context-dependent gated readout.
 
-1. Feature embedding for heterogeneous categorical and numerical attributes
-2. Feature interaction graph learning with recurrent state evolution
-3. Enhanced IRT-inspired prediction with difficulty- and ability-related factors
-
-The paper figures are included in this repository:
-
-- [fig1.pdf](./fig1.pdf): standard IRT vs. enhanced IRT-inspired prediction
-- [fig2.pdf](./fig2.pdf): heterogeneous interaction records and evolving knowledge state
-- [fig3.pdf](./fig3.pdf): overall FigKT architecture
-
-## Important Note on Naming
-
-The implementation file currently keeps the historical class name `FiGNN`, but the code in this repository corresponds to the **FigKT** model used in the paper.
-
-In particular, the model implementation already includes the enhanced IRT-inspired branch:
-
-- question-difficulty layer
-- student-ability layer
-- intermediate representation `p = h_out - que_diff + stu_ability`
-
-Main implementation file:
-
-- [model_zoo/FiGNN/src/FiGNN.py](./model_zoo/FiGNN/src/FiGNN.py)
+The implementation is based on the FuxiCTR training framework and is organized as a model-zoo entry under `model_zoo/FIKT`.
 
 ## Repository Structure
 
 ```text
-FigKT/
+FIKT/
 ├── README.md
-├── sn-article.tex
-├── sn-bibliography.bib
-├── fig1.pdf ... fig8.pdf
+├── LICENSE
 ├── model_zoo/
-│   └── FiGNN/
+│   └── FIKT/
 │       ├── config/
 │       │   ├── dataset_config.yaml
 │       │   └── model_config.yaml
 │       ├── run_expid.py
 │       └── src/
-│           └── FiGNN.py
+│           └── FIKT.py
 ├── experiment/
 │   ├── run_expid.py
 │   └── run_param_tuner.py
@@ -66,46 +40,46 @@ FigKT/
 
 ## Model Entry Points
 
-The most relevant files for the paper model are:
+The most relevant files are:
 
-- Model definition:
-  [model_zoo/FiGNN/src/FiGNN.py](./model_zoo/FiGNN/src/FiGNN.py)
-- Training entry:
-  [model_zoo/FiGNN/run_expid.py](./model_zoo/FiGNN/run_expid.py)
-- Model hyperparameters:
-  [model_zoo/FiGNN/config/model_config.yaml](./model_zoo/FiGNN/config/model_config.yaml)
-- Dataset paths:
-  [model_zoo/FiGNN/config/dataset_config.yaml](./model_zoo/FiGNN/config/dataset_config.yaml)
+- Model definition: [model_zoo/FIKT/src/FIKT.py](./model_zoo/FIKT/src/FIKT.py)
+- Training entry: [model_zoo/FIKT/run_expid.py](./model_zoo/FIKT/run_expid.py)
+- Model hyperparameters: [model_zoo/FIKT/config/model_config.yaml](./model_zoo/FIKT/config/model_config.yaml)
+- Dataset paths: [model_zoo/FIKT/config/dataset_config.yaml](./model_zoo/FIKT/config/dataset_config.yaml)
 
 ## Implementation Notes
 
-From the current implementation, the model has the following characteristics:
+The current implementation includes:
 
-- Feature embeddings are built through the FuxiCTR `FeatureEmbedding` interface.
-- Numerical features are embedded with a linear projection.
-- Categorical features are embedded with embedding tables.
-- Feature interactions are modeled with attention-based fully connected message passing.
-- Dynamic state updates are performed with a `GRUCell`.
-- Residual connections are enabled.
-- The final prediction combines graph output with difficulty- and ability-related factors.
+- Feature embeddings through the FuxiCTR `FeatureEmbedding` interface.
+- Embedding-table representations for categorical fields.
+- Linear projection support for numerical fields through the feature processing pipeline.
+- A dense directed feature graph with attention-based edge weights.
+- Recurrent graph-state refinement with `GRUCell`.
+- Residual connections from the initial feature embeddings.
+- Difficulty-related and ability-related neural branches.
+- A gated prediction head for context-dependent readout.
 
-The current model file includes:
+The IRT-inspired prediction module is implemented as:
 
-- `diff_layer = Linear(embedding_dim, 1) + Tanh`
-- `ability_layer = Linear(embedding_dim, 1) + Tanh`
-- `p = h_out - que_diff + stu_ability`
+```python
+que_diff = diff_layer(dropout(feature_emb))
+stu_ability = ability_layer(dropout(h_out))
+p = h_out - que_diff + stu_ability
+y_pred = sigmoid(gated_readout(p))
+```
 
-These correspond to the enhanced IRT-inspired prediction module described in the paper.
+The difficulty-related and ability-related quantities are learned neural factors used for prediction. They should not be interpreted as externally calibrated psychometric parameters.
 
 ## Default Training Configuration
 
-The published configuration under [model_zoo/FiGNN/config/model_config.yaml](./model_zoo/FiGNN/config/model_config.yaml) contains the following default settings:
+The default configuration in [model_zoo/FIKT/config/model_config.yaml](./model_zoo/FIKT/config/model_config.yaml) uses:
 
 - optimizer: `adam`
 - learning rate: `1e-3`
 - batch size: `256`
 - embedding dimension: `128`
-- GNN layers: `1`
+- graph layers: `1`
 - residual connection: `True`
 - GRU update: `True`
 - parameter sharing across graph layers: `False`
@@ -115,7 +89,7 @@ The published configuration under [model_zoo/FiGNN/config/model_config.yaml](./m
 - monitor mode: `max`
 - random seed: `2024`
 
-The training framework in `fuxictr` additionally uses gradient clipping with a default maximum norm of `10`.
+The training framework additionally applies gradient clipping with a default maximum norm of `10`.
 
 ## Data Preparation
 
@@ -125,17 +99,17 @@ This repository includes a demo-style feature configuration for `bridge2006_csv`
 
 The demo configuration uses:
 
-- categorical features:
+- categorical fields:
   - `Anon Student Id`
   - `KC(SubSkills)`
   - `Questions`
   - `Hints`
-- numerical feature:
+- numerical field:
   - `First Transaction Time`
 - label:
   - `correct`
 
-You can build parquet-format training data with:
+To build parquet-format training data from the demo configuration:
 
 ```bash
 cd demo
@@ -144,20 +118,22 @@ python example1_build_dataset_to_parquet.py
 
 ## Training
 
-To run the model from the model zoo entry:
+To run the default FIKT experiment:
 
 ```bash
-cd model_zoo/FiGNN
-python run_expid.py --config ./config --expid FiGNN_test --gpu 0
+cd model_zoo/FIKT
+python run_expid.py --config ./config --expid FIKT_test --gpu 0
 ```
+
+Use `--gpu -1` to run on CPU.
 
 The script will:
 
-1. load dataset and model configurations
-2. build the feature map if the input format is CSV
-3. instantiate the model
-4. train with validation monitoring
-5. evaluate the best checkpoint on validation and test sets
+1. load dataset and model configurations;
+2. build the feature map if the input format is CSV;
+3. instantiate `FIKT`;
+4. train with validation monitoring;
+5. evaluate the best checkpoint on validation and test sets.
 
 ## Hyperparameter Search
 
@@ -172,34 +148,23 @@ cd experiment
 python run_param_tuner.py --config ../config/tuner_config.yaml --gpu 0
 ```
 
-Note:
-the tuner config file is not currently included in this repository, so this command is only meaningful after adding the corresponding tuning configuration.
+The tuner config file is not included by default, so this command is only meaningful after adding the corresponding tuning configuration.
 
-## Current Limitations of the Public Repository
+## Current Scope of This Public Repository
 
-At the moment, the repository is most directly useful for understanding the FigKT implementation and reproducing the modeling pipeline for the provided configuration. However, a few points should be noted:
+This anonymous repository is intended to document the FIKT implementation and provide the main modeling pipeline used in the paper. A few points should be noted:
 
-- The main model implementation still uses the historical name `FiGNN`.
-- Public configuration files currently expose a demo setup most clearly for `bridge2006_csv`.
-- The manuscript reports four datasets, but not all final experiment-specific configuration files are explicitly provided in this repository.
-- The LaTeX paper and figures are included, but the repository is not yet packaged as a polished public release for full reproduction of every reported experiment.
-
-## Paper Files
-
-The manuscript source is included here:
-
-- [sn-article.tex](./sn-article.tex)
-- [sn-bibliography.bib](./sn-bibliography.bib)
-
-These files can be used to revise the submission manuscript directly.
+- The included public configuration most directly exposes the `bridge2006_csv` demo setup.
+- The manuscript reports experiments on four public KT datasets, but not every final experiment-specific configuration file is included here.
+- Dataset preprocessing and feature configuration should be checked carefully before reproducing a specific table from the paper.
 
 ## Citation
 
-If you use this repository, please cite the corresponding FigKT paper once the final bibliographic information is available.
+If you use this repository, please cite the corresponding FIKT paper once the final bibliographic information is available.
 
 ```bibtex
-@article{figkt,
-  title   = {FigKT: Knowledge Tracing with Dynamic Feature Interaction Graph and Enhanced Item Response Theory},
+@article{fikt,
+  title   = {FIKT: Feature-Interaction Knowledge Tracing with Adaptive Graphs and IRT-Inspired Prediction},
   author  = {Anonymous for review},
   journal = {Applied Intelligence},
   year    = {under review}

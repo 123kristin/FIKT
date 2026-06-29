@@ -25,12 +25,11 @@ from fuxictr.pytorch.models import BaseModel
 from fuxictr.pytorch.layers import FeatureEmbedding
 
 from torch.nn import Linear
-import numpy as np
 
-class FiGNN(BaseModel):
+class FIKT(BaseModel):
     def __init__(self, 
                  feature_map, 
-                 model_id="FiGNN", 
+                 model_id="FIKT", 
                  gpu=-1, 
                  learning_rate=1e-3, 
                  embedding_dim=10, 
@@ -41,51 +40,44 @@ class FiGNN(BaseModel):
                  embedding_regularizer=None,
                  net_regularizer=None,
                  **kwargs):
-        super(FiGNN, self).__init__(feature_map, 
-                                    model_id=model_id, 
-                                    gpu=gpu, 
-                                    embedding_regularizer=embedding_regularizer,
-                                    net_regularizer=net_regularizer,
-                                    **kwargs)
+        super(FIKT, self).__init__(feature_map, 
+                                   model_id=model_id, 
+                                   gpu=gpu, 
+                                   embedding_regularizer=embedding_regularizer,
+                                   net_regularizer=net_regularizer,
+                                   **kwargs)
         num_fields = feature_map.num_fields
         self.embedding_layer = FeatureEmbedding(feature_map, embedding_dim)
-        self.fignn = FiGNN_Layer(num_fields, 
-                                 embedding_dim,
-                                 gnn_layers=gnn_layers,
-                                 reuse_graph_layer=reuse_graph_layer,
-                                 use_gru=use_gru,
-                                 use_residual=use_residual)
+        self.feature_graph = FIKTLayer(num_fields, 
+                                       embedding_dim,
+                                       gnn_layers=gnn_layers,
+                                       reuse_graph_layer=reuse_graph_layer,
+                                       use_gru=use_gru,
+                                       use_residual=use_residual)
         self.fc = AttentionalPrediction(num_fields, embedding_dim)
 
-        # todo IRT 测试github
-        self.diff_layer = nn.Sequential(Linear(embedding_dim,1),nn.Tanh()) # 
-        self.ability_layer = nn.Sequential(Linear(embedding_dim,1),nn.Tanh()) # 
-        self.dropout = nn.Dropout(p=0.001) # 
+        self.diff_layer = nn.Sequential(Linear(embedding_dim, 1), nn.Tanh())
+        self.ability_layer = nn.Sequential(Linear(embedding_dim, 1), nn.Tanh())
+        self.dropout = nn.Dropout(p=0.001)
 
         self.compile(kwargs["optimizer"], kwargs["loss"], learning_rate)
         self.reset_parameters()
         self.model_to_device()
     
-    # 加IRT               
     def forward(self, inputs):
         X = self.get_inputs(inputs)
-        feature_emb = self.embedding_layer(X) # torch.Size([256, 4, 128])
-        h_out = self.fignn(feature_emb) # torch.Size([256, 4, 128])
-        # todo IRT
-        que_diff = self.diff_layer(self.dropout(feature_emb)) # torch.Size([256, 5, 1])
+        feature_emb = self.embedding_layer(X)
+        h_out = self.feature_graph(feature_emb)
+        que_diff = self.diff_layer(self.dropout(feature_emb))
         stu_ability = self.ability_layer(self.dropout(h_out))
-        p = (h_out - que_diff + stu_ability) #  nips3
-        y_pred = self.fc(p) # [batch_size, 1]
+        p = h_out - que_diff + stu_ability
+        y_pred = self.fc(p)
 
-        # y_pred = self.fc(h_out) # 原本
-        y_pred = torch.sigmoid(y_pred)  # [batch_size, 1]
+        y_pred = torch.sigmoid(y_pred)
         return_dict = {"y_pred": y_pred}
-
-      
-
         return return_dict
 
-class FiGNN_Layer(nn.Module):
+class FIKTLayer(nn.Module):
     def __init__(self, 
                  num_fields, 
                  embedding_dim,
@@ -93,7 +85,7 @@ class FiGNN_Layer(nn.Module):
                  reuse_graph_layer=False,
                  use_gru=True,
                  use_residual=True):
-        super(FiGNN_Layer, self).__init__()
+        super(FIKTLayer, self).__init__()
         self.num_fields = num_fields
         self.embedding_dim = embedding_dim
         self.gnn_layers = gnn_layers
